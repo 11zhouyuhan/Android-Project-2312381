@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="background">#FFDCDAFA</color>
+    <color name="paper">#FFFFFEF6</color>
+    <color name="purple">#FF6A70DD</color>
+    <color name="ink">#FF393A32</color>
+    <color name="muted">#FF7C806C</color>
+    <color name="green">#FF36704F</color>
+    <color name="pale_green">#FFE5EEDB</color>
+
+    <color name="sky">#FFD8F0F3</color>
+    <color name="grass">#FF83AB64</color>
+    <color name="brown">#FF936C46</color>
+    <color name="gold">#FFF0BD4E</color>
+    <color name="track">#FFCAD8BD</color>
+    <color name="calendar_day">#FFF5F4EC</color>
+    <color name="bar_past">#FFA6BE8E</color>
+</resources>
