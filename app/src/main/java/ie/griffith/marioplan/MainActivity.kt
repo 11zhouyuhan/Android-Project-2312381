@@ -1,9 +1,13 @@
 package ie.griffith.marioplan
 
+import android.R.id.toggle
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -71,6 +75,71 @@ class MainActivity : ComponentActivity() {
 
     }
 }
+//opened with an explicit intent from the Calendar Home screen.
+class LevelMapActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val ids = intent.getIntArrayExtra("ids") ?: intArrayOf()
+        val titles = intent.getStringArrayExtra("titles") ?: emptyArray()
+        val times = intent.getStringArrayExtra("times") ?: emptyArray()
+        val monsters = intent.getStringArrayExtra("monsters") ?: emptyArray()
+        val afternoon = intent.getBooleanArrayExtra("afternoon") ?: booleanArrayOf()
+        val done = intent.getBooleanArrayExtra("done") ?: booleanArrayOf()
+        val images = intent.getIntArrayExtra("images") ?: intArrayOf()
+        val selected = DayKey(
+            intent.getIntExtra("year", 2026),
+            intent.getIntExtra("month", 0),
+            intent.getIntExtra("day", 1)
+        )
+        val startQuests = ids.indices.map { i ->
+            Quest(ids[i], titles[i], times[i], monsters[i], afternoon[i], done[i], images[i])
+        }
+        setContent {
+            AdventureTheme {
+                val quests = remember { mutableStateListOf<Quest>().apply { addAll(startQuests) } }
+                val completed = quests.count { it.done }
+                val progress = if (quests.isEmpty()) 0f else completed.toFloat() / quests.size
+                BackHandler { sendResultAndFinish(quests, false) }
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .safeDrawingPadding()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        MapScreen(
+                            quests = quests,
+                            selected = selected,
+                            progress = progress,
+                            completed = completed,
+                            onToggle = { id ->
+                                val index = quests.indexOfFirst { it.id == id }
+                                if (index >= 0) {
+                                    quests[index] = quests[index].copy(done = !quests[index].done)
+                                }
+                            },
+                            onProgress = { sendResultAndFinish(quests, true) },
+                            onBack = { sendResultAndFinish(quests, false) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+    // Sends the finished tasks back to MainActivity, then closes this screen.
+    private fun sendResultAndFinish(quests: List<Quest>, goProgress: Boolean) {
+        val data = Intent().apply {
+            putExtra("doneIds", quests.filter { it.done }.map { it.id }.toIntArray())
+            putExtra("goProgress", goProgress)
+        }
+        setResult(RESULT_OK, data)
+        finish()
+    }
+}
+
 @Composable
 private fun AdventureApp() {
     var screen by remember { mutableStateOf(Screen.Home) }
@@ -106,6 +175,22 @@ private fun AdventureApp() {
             quests[index] = quests[index].copy(done = !quests[index].done)
         }
     }
+    val context = LocalContext.current
+    // Receives the result sent back by LevelMapActivity.
+    val mapLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val data = result.data
+        if (data != null) {
+            val doneIds = data.getIntArrayExtra("doneIds")?.toSet() ?: emptySet()
+            for (i in quests.indices) {
+                quests[i] = quests[i].copy(done = quests[i].id in doneIds)
+            }
+            if (data.getBooleanExtra("goProgress", false)) {
+                screen = Screen.Progress
+            }
+        }
+    }
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -126,7 +211,19 @@ private fun AdventureApp() {
                     completed = completed,
                     onToggle = toggle,
                     onAdd = { showAdd = true },
-                    onMap = { screen = Screen.Map }
+                    onMap = { val intent = Intent(context, LevelMapActivity::class.java).apply {
+                        putExtra("ids", quests.map { it.id }.toIntArray())
+                        putExtra("titles", quests.map { it.title }.toTypedArray())
+                        putExtra("times", quests.map { it.time }.toTypedArray())
+                        putExtra("monsters", quests.map { it.monster }.toTypedArray())
+                        putExtra("afternoon", quests.map { it.afternoon }.toBooleanArray())
+                        putExtra("done", quests.map { it.done }.toBooleanArray())
+                        putExtra("images", quests.map { it.image }.toIntArray())
+                        putExtra("year", selected.year)
+                        putExtra("month", selected.month)
+                        putExtra("day", selected.day )
+                    }
+                        mapLauncher.launch(intent) }
                 )
                 Screen.Map -> MapScreen(
                     quests = quests,

@@ -22,7 +22,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+            </activity>
+        <activity
+            android:name=".LevelMapActivity"
+            android:exported="false"
+            android:label="Level Map"
+            android:theme="@style/Theme.Marioplan" />
     </application>
 
 </manifest>
