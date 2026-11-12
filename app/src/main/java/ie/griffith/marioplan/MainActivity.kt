@@ -27,7 +27,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ie.griffith.marioplan.model.DayKey
@@ -39,6 +38,11 @@ import java.util.Calendar
 import kotlin.collections.filter
 import kotlin.collections.reversed
 import ie.griffith.marioplan.model.Screen
+import ie.griffith.marioplan.ui.components.MainButton
+import ie.griffith.marioplan.ui.components.PaperCard
+import ie.griffith.marioplan.ui.components.ProgressSummary
+import ie.griffith.marioplan.ui.components.ProgressTrack
+import ie.griffith.marioplan.ui.components.Header
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -208,139 +212,7 @@ private fun AdventureApp() {
         )
     }
 }
-//Reusable pieces
-@Composable
-private fun Header(kicker: String, title: String, @DrawableRes icon: Int) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                kicker.uppercase(),
-                fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                letterSpacing = 0.6.sp
-            )
-            Text(
-                title,
-                fontSize = 22.sp,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-        Box(
-            Modifier
-                .size(44.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.size(32.dp)
-            )
-        }
-    }
-}
-@Composable
-private fun PaperCard(
-    modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.surface,
-    padding: Dp = 12.dp,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Column(
-        modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(color)
-            .padding(padding),
-        content = content
-    )
-}
-@Composable
-private fun MainButton(
-    text: String,
-    @DrawableRes icon: Int,
-    modifier: Modifier = Modifier,
-    secondary: Boolean = false,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.heightIn(min = 46.dp),
-        shape = RoundedCornerShape(10.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (secondary) MaterialTheme.colorScheme.surface
-            else MaterialTheme.colorScheme.primary,
-            contentColor = if (secondary) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onPrimary
-        )
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(Modifier.width(6.dp))
-        Text(text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-    }
-}
-@Composable
-private fun ProgressSummary(completed: Int, total: Int, progress: Float) {
-    PaperCard(color = MaterialTheme.colorScheme.surfaceVariant) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(R.drawable.star),
-                contentDescription = null,
-                modifier = Modifier.size(28.dp)
-            )
-            Spacer(Modifier.width(10.dp))
-            Column(Modifier.weight(1f)) {
-                Row {
-                    Text(
-                        "$completed/$total tasks completed",
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        "${(progress * 100).toInt()}%",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 12.sp
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
-                ProgressTrack(progress)
-            }
-        }
-    }
-}
-@Composable
-private fun ProgressTrack(progress: Float) {
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .height(8.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .background(colorResource(R.color.track))
-    ) {
-        if (progress > 0f) {
-            Box(
-                Modifier
-                    .fillMaxWidth(progress.coerceIn(0f, 1f))
-                    .fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-        }
-    }
-}
+
 //Home
 @Composable
 private fun HomeScreen(
