@@ -1,10 +1,8 @@
 package ie.griffith.marioplan
 
-import android.R.id.toggle
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,38 +30,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ie.griffith.marioplan.model.DayKey
+import ie.griffith.marioplan.model.Quest
+import ie.griffith.marioplan.model.currentDay
 import ie.griffith.marioplan.ui.theme.AdventureTheme
 import kotlinx.coroutines.delay
 import java.util.Calendar
-import java.util.Locale
+import kotlin.collections.filter
+import kotlin.collections.reversed
+import ie.griffith.marioplan.model.Screen
 
-data class Quest(
-    val id: Int,
-    val title: String,
-    val time: String,
-    val monster: String,
-    val afternoon: Boolean,
-    val done: Boolean,
-    @DrawableRes val image: Int
-)
-enum class Screen { Home, Map, Progress }
-// A calendar day. month is 0-based, the same as java.util.Calendar.
- data class DayKey(val year: Int, val month: Int, val day: Int) {
-    private fun toCalendar(): Calendar =
-        Calendar.getInstance().apply { clear(); set(year, month, day) }
-    fun monthName(): String =
-        toCalendar().getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.ENGLISH) ?: ""
-    fun weekdayName(): String =
-        toCalendar().getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.ENGLISH) ?: ""
-}
- fun currentDay(): DayKey {
-    val now = Calendar.getInstance()
-    return DayKey(
-        now.get(Calendar.YEAR),
-        now.get(Calendar.MONTH),
-        now.get(Calendar.DAY_OF_MONTH)
-    )
-}
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,10 +73,42 @@ private fun AdventureApp() {
     val quests = remember {
         mutableStateListOf(
             Quest(1, "Read 10 pages", "08:00", "Moss slime", false, true, R.drawable.monster_slime),
-            Quest(2, "Review lecture notes", "09:30", "Cloud bat", false, true, R.drawable.monster_bat),
-            Quest(3, "Drink 2L of water", "11:00", "Coral crab", false, true, R.drawable.monster_crab),
-            Quest(4, "Finish app wireframes", "14:00", "Mist ghost", true, false, R.drawable.monster_ghost),
-            Quest(5, "Walk for 20 minutes", "16:30", "Amber blob", true, false, R.drawable.monster_blob)
+            Quest(
+                2,
+                "Review lecture notes",
+                "09:30",
+                "Cloud bat",
+                false,
+                true,
+                R.drawable.monster_bat
+            ),
+            Quest(
+                3,
+                "Drink 2L of water",
+                "11:00",
+                "Coral crab",
+                false,
+                true,
+                R.drawable.monster_crab
+            ),
+            Quest(
+                4,
+                "Finish app wireframes",
+                "14:00",
+                "Mist ghost",
+                true,
+                false,
+                R.drawable.monster_ghost
+            ),
+            Quest(
+                5,
+                "Walk for 20 minutes",
+                "16:30",
+                "Amber blob",
+                true,
+                false,
+                R.drawable.monster_blob
+            )
         )
     }
     val completed = quests.count { it.done }

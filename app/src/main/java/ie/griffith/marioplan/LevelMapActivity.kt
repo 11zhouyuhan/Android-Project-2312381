@@ -15,7 +15,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ie.griffith.marioplan.model.DayKey
+import ie.griffith.marioplan.model.Quest
 import ie.griffith.marioplan.ui.theme.AdventureTheme
+import kotlin.collections.filter
 
 //opened with an explicit intent from the Calendar Home screen.
 class LevelMapActivity : ComponentActivity() {
