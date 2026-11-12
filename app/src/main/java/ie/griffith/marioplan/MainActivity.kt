@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +21,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,6 +33,7 @@ import java.util.Calendar
 import kotlin.collections.filter
 import kotlin.collections.reversed
 import ie.griffith.marioplan.model.Screen
+import ie.griffith.marioplan.ui.components.AddQuestDialog
 import ie.griffith.marioplan.ui.components.CalendarCard
 import ie.griffith.marioplan.ui.components.MainButton
 import ie.griffith.marioplan.ui.components.PaperCard
@@ -42,7 +41,9 @@ import ie.griffith.marioplan.ui.components.ProgressSummary
 import ie.griffith.marioplan.ui.components.ProgressTrack
 import ie.griffith.marioplan.ui.components.Header
 import ie.griffith.marioplan.ui.components.QuestRow
+import ie.griffith.marioplan.ui.components.RewardCard
 import ie.griffith.marioplan.ui.components.SectionLabel
+import ie.griffith.marioplan.ui.components.StatCard
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -638,112 +639,4 @@ private fun ProgressScreen(
             }
         }
     }
-}
-@Composable
-private fun StatCard(
-    value: String,
-    title: String,
-    subtitle: String,
-    modifier: Modifier
-) {
-    PaperCard(modifier) {
-        Text(
-            value.padStart(2, '0'),
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 26.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            title,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            subtitle,
-            fontSize = 9.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-@Composable
-private fun RewardCard(
-    title: String,
-    @DrawableRes icon: Int,
-    earned: Boolean,
-    modifier: Modifier
-) {
-    Column(
-        modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                if (earned) MaterialTheme.colorScheme.surface
-                else colorResource(R.color.calendar_day)
-            )
-            .padding(vertical = 12.dp, horizontal = 5.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(icon),
-            contentDescription = title,
-            alpha = if (earned) 1f else 0.3f,
-            modifier = Modifier.size(32.dp)
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            title,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            if (earned) "UNLOCKED" else "LOCKED",
-            color = if (earned) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 8.sp
-        )
-    }
-}
-// Add task dialog
-@Composable
-private fun AddQuestDialog(
-    onDismiss: () -> Unit,
-    onAdd: (String, Boolean) -> Unit
-) {
-    var title by remember { mutableStateOf("") }
-    var afternoon by remember { mutableStateOf(false) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("A new adventure") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Task description") },
-                    singleLine = true
-                )
-                Spacer(Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Afternoon task", Modifier.weight(1f))
-                    Switch(
-                        checked = afternoon,
-                        onCheckedChange = { afternoon = it }
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = title.isNotBlank(),
-                onClick = { onAdd(title.trim(), afternoon) }
-            ) {
-                Text("Add Task")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        }
-    )
 }
