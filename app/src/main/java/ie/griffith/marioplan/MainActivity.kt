@@ -48,7 +48,7 @@ data class Quest(
 )
 enum class Screen { Home, Map, Progress }
 // A calendar day. month is 0-based, the same as java.util.Calendar.
-private data class DayKey(val year: Int, val month: Int, val day: Int) {
+ data class DayKey(val year: Int, val month: Int, val day: Int) {
     private fun toCalendar(): Calendar =
         Calendar.getInstance().apply { clear(); set(year, month, day) }
     fun monthName(): String =
@@ -56,7 +56,7 @@ private data class DayKey(val year: Int, val month: Int, val day: Int) {
     fun weekdayName(): String =
         toCalendar().getDisplayName(Calendar.DAY_OF_WEEK, Calendar.LONG, Locale.ENGLISH) ?: ""
 }
-private fun currentDay(): DayKey {
+ fun currentDay(): DayKey {
     val now = Calendar.getInstance()
     return DayKey(
         now.get(Calendar.YEAR),
@@ -73,70 +73,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-    }
-}
-//opened with an explicit intent from the Calendar Home screen.
-class LevelMapActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val ids = intent.getIntArrayExtra("ids") ?: intArrayOf()
-        val titles = intent.getStringArrayExtra("titles") ?: emptyArray()
-        val times = intent.getStringArrayExtra("times") ?: emptyArray()
-        val monsters = intent.getStringArrayExtra("monsters") ?: emptyArray()
-        val afternoon = intent.getBooleanArrayExtra("afternoon") ?: booleanArrayOf()
-        val done = intent.getBooleanArrayExtra("done") ?: booleanArrayOf()
-        val images = intent.getIntArrayExtra("images") ?: intArrayOf()
-        val selected = DayKey(
-            intent.getIntExtra("year", 2026),
-            intent.getIntExtra("month", 0),
-            intent.getIntExtra("day", 1)
-        )
-        val startQuests = ids.indices.map { i ->
-            Quest(ids[i], titles[i], times[i], monsters[i], afternoon[i], done[i], images[i])
-        }
-        setContent {
-            AdventureTheme {
-                val quests = remember { mutableStateListOf<Quest>().apply { addAll(startQuests) } }
-                val completed = quests.count { it.done }
-                val progress = if (quests.isEmpty()) 0f else completed.toFloat() / quests.size
-                BackHandler { sendResultAndFinish(quests, false) }
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .safeDrawingPadding()
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        MapScreen(
-                            quests = quests,
-                            selected = selected,
-                            progress = progress,
-                            completed = completed,
-                            onToggle = { id ->
-                                val index = quests.indexOfFirst { it.id == id }
-                                if (index >= 0) {
-                                    quests[index] = quests[index].copy(done = !quests[index].done)
-                                }
-                            },
-                            onProgress = { sendResultAndFinish(quests, true) },
-                            onBack = { sendResultAndFinish(quests, false) }
-                        )
-                    }
-                }
-            }
-        }
-    }
-    // Sends the finished tasks back to MainActivity, then closes this screen.
-    private fun sendResultAndFinish(quests: List<Quest>, goProgress: Boolean) {
-        val data = Intent().apply {
-            putExtra("doneIds", quests.filter { it.done }.map { it.id }.toIntArray())
-            putExtra("goProgress", goProgress)
-        }
-        setResult(RESULT_OK, data)
-        finish()
     }
 }
 
@@ -599,7 +535,7 @@ private fun QuestRow(quest: Quest, onToggle: () -> Unit) {
 }
 //Level map
 @Composable
-private fun MapScreen(
+ fun MapScreen(
     quests: List<Quest>,
     selected: DayKey,
     progress: Float,
