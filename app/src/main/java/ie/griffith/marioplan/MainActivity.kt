@@ -9,7 +9,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -20,13 +19,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ie.griffith.marioplan.model.DayKey
@@ -38,11 +35,14 @@ import java.util.Calendar
 import kotlin.collections.filter
 import kotlin.collections.reversed
 import ie.griffith.marioplan.model.Screen
+import ie.griffith.marioplan.ui.components.CalendarCard
 import ie.griffith.marioplan.ui.components.MainButton
 import ie.griffith.marioplan.ui.components.PaperCard
 import ie.griffith.marioplan.ui.components.ProgressSummary
 import ie.griffith.marioplan.ui.components.ProgressTrack
 import ie.griffith.marioplan.ui.components.Header
+import ie.griffith.marioplan.ui.components.QuestRow
+import ie.griffith.marioplan.ui.components.SectionLabel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -285,134 +285,7 @@ private fun HomeScreen(
         }
     }
 }
-@Composable
-private fun CalendarCard(today: DayKey, selected: DayKey, onDay: (DayKey) -> Unit) {
-    // The month shown is always the real current month of the device.
-    val first = Calendar.getInstance().apply { clear(); set(today.year, today.month, 1) }
-    val offset = first.get(Calendar.DAY_OF_WEEK) - 1 // Sunday = 0
-    val daysInMonth = first.getActualMaximum(Calendar.DAY_OF_MONTH)
-    val weeks = (offset + daysInMonth + 6) / 7
-    PaperCard {
-        Text(
-            "${today.monthName()} ${today.year}",
-            Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(Modifier.height(6.dp))
-        Row {
-            listOf("S", "M", "T", "W", "T", "F", "S").forEach {
-                Text(
-                    it,
-                    Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-        Spacer(Modifier.height(2.dp))
-        repeat(weeks) { week ->
-            Row(Modifier.fillMaxWidth()) {
-                repeat(7) { weekday ->
-                    val date = week * 7 + weekday - offset + 1
-                    val valid = date in 1..daysInMonth
-                    val isSelected = valid &&
-                            selected.year == today.year &&
-                            selected.month == today.month &&
-                            selected.day == date
-                    val isToday = valid && date == today.day
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(2.dp)
-                            .height(26.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .background(
-                                when {
-                                    isSelected -> MaterialTheme.colorScheme.primary
-                                    valid -> colorResource(R.color.calendar_day)
-                                    else -> Color.Transparent
-                                }
-                            )
-                            .then(
-                                if (isToday && !isSelected) {
-                                    Modifier.border(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.primary,
-                                        RoundedCornerShape(5.dp)
-                                    )
-                                } else {
-                                    Modifier
-                                }
-                            )
-                            .clickable(enabled = valid) {
-                                onDay(DayKey(today.year, today.month, date))
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            if (valid) "$date" else "",
-                            fontSize = 11.sp,
-                            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-@Composable
-private fun SectionLabel(label: String, quests: List<Quest>) {
-    Row(Modifier.fillMaxWidth()) {
-        Text(
-            label,
-            Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            "${quests.count { it.done }} of ${quests.size} complete",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 10.sp
-        )
-    }
-}
-@Composable
-private fun QuestRow(quest: Quest, onToggle: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onToggle)
-            .padding(end = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(checked = quest.done, onCheckedChange = { onToggle() })
-        Column(
-            Modifier
-                .weight(1f)
-                .padding(vertical = 4.dp)
-        ) {
-            Text(quest.title, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface)
-            Text(
-                "${quest.time} · ${quest.monster}",
-                fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Image(
-            painter = painterResource(quest.image),
-            contentDescription = quest.monster,
-            modifier = Modifier.size(30.dp)
-        )
-    }
-}
+
 //Level map
 @Composable
  fun MapScreen(
